@@ -1,0 +1,132 @@
+---
+description: frontend rules
+globs: */backend
+---
+---
+description: "FastAPI Project Frontend Rules: Guidelines for setting up, developing, and maintaining the frontend."
+globs:
+  - "frontend/src/**/*.{tsx,ts}"
+  - "frontend/package.json"
+  - "frontend/.env"
+  - "frontend/scripts/**/*.sh"
+---
+
+# FastAPI Project Frontend Rules
+
+This document outlines best practices and context for the frontend of our FastAPI project. It is designed to guide AI tools (like Cursor) when generating or modifying code in the frontend, ensuring that contributions adhere to our chosen technologies and workflow.
+
+## 1. Project Overview
+
+- **Framework & Tools:**
+  - **Build Tool:** [Vite](https://vitejs.dev/)
+  - **Library:** [React](https://reactjs.org/) with [TypeScript](https://www.typescriptlang.org/)
+  - **Data Fetching:** [TanStack Query](https://tanstack.com/query)
+  - **Routing:** [TanStack Router](https://tanstack.com/router)
+  - **UI Library:** [Chakra UI](https://chakra-ui.com/)
+
+## 2. Environment Setup and Development
+
+- **Node Version Management:**
+  - Use either [fnm](https://github.com/Schniz/fnm#installation) or [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) as per your preference.
+  - In the `frontend` directory, install and switch to the correct Node.js version:
+    ```bash
+    # If using fnm:
+    fnm install
+    fnm use
+
+    # If using nvm:
+    nvm install
+    nvm use
+    ```
+- **Install Dependencies:**
+  - Run the following command in the `frontend` directory:
+    ```bash
+    npm install
+    ```
+- **Start the Development Server:**
+  - Launch the live server with:
+    ```bash
+    npm run dev
+    ```
+  - Open your browser at [http://localhost:5173/](http://localhost:5173/).
+
+## 3. Frontend Build and Removal
+
+- **Local vs. Production Workflow:**
+  - For rapid iteration, use the local development server with live reload.
+  - To test a production-like environment, build the Docker image; note that rebuilding on every change is less productive.
+- **Removing the Frontend:**
+  - If the project is API-only, the entire `frontend` directory can be removed.
+  - Update `docker-compose.yml` and `docker-compose.override.yml` to remove frontend (and related `playwright`) services.
+  - Optionally clean up `FRONTEND` environment variables from `.env` and any script files.
+
+## 4. Client Generation
+
+### Automatically
+
+- **Using the Script:**
+  - Activate the backend virtual environment.
+  - Run the following from the project root:
+    ```bash
+    ./scripts/generate-client.sh
+    ```
+  - Commit any changes.
+
+### Manually
+
+- **Steps:**
+  - Start the Docker Compose stack.
+  - Download the OpenAPI JSON from `http://localhost/api/v1/openapi.json` and save it as `openapi.json` in the `frontend` directory.
+  - Generate the client with:
+    ```bash
+    npm run generate-client
+    ```
+  - Commit the updated client code.
+
+*Note:* Update the client every time the backend’s OpenAPI schema changes.
+
+## 5. Using a Remote API
+
+- **Configuration:**
+  - Set the `VITE_API_URL` environment variable in the `frontend/.env` file, for example:
+    ```env
+    VITE_API_URL=https://api.my-domain.example.com
+    ```
+  - This URL will serve as the base URL for API requests during frontend execution.
+
+## 6. Code Structure
+
+- **Directory Layout:**
+  - `frontend/src` – Main frontend code.
+  - `frontend/src/assets` – Static assets.
+  - `frontend/src/client` – Generated OpenAPI client.
+  - `frontend/src/components` – React components.
+  - `frontend/src/hooks` – Custom hooks.
+  - `frontend/src/routes` – Application routes and pages.
+  - `theme.tsx` – Custom Chakra UI theme.
+
+## 7. End-to-End Testing with Playwright
+
+- **Test Setup:**
+  - Start the backend service using Docker Compose:
+    ```bash
+    docker compose up -d --wait backend
+    ```
+- **Running Tests:**
+  - For headless testing:
+    ```bash
+    npx playwright test
+    ```
+  - For UI mode (to interact with the browser):
+    ```bash
+    npx playwright test --ui
+    ```
+- **Teardown:**
+  - Stop and remove test containers and data:
+    ```bash
+    docker compose down -v
+    ```
+
+---
+
+These rules provide a comprehensive context for both human developers and AI-assisted tools, ensuring that any generated or modified code is consistent with our frontend architecture and workflow.

@@ -1,0 +1,119 @@
+---
+description: backend instructions
+globs: */backend
+---
+---
+description: "FastAPI Project Backend Rules: Guidelines for setting up, developing, and maintaining the backend."
+globs:
+  - "backend/app/**/*.py"
+  - "docker-compose*.yml"
+  - "scripts/**/*.sh"
+  - "backend/app/email-templates/**"
+---
+
+# FastAPI Project Backend Rules
+
+This document provides guidelines and context for the backend of our FastAPI project. The rules below are intended to help AI tools (like Cursor) generate code that conforms to our project's best practices and development workflow.
+
+## 1. Project Overview
+
+- **Framework:** [FastAPI](mdc:https:/fastapi.tiangolo.com)
+- **Dependency Management:** [uv](mdc:https:/docs.astral.sh/uv)
+- **ORM:** [SQLModel](mdc:https:/sqlmodel.tiangolo.com)
+- **Migrations:** Alembic for schema changes
+- **Containerization:** Docker Compose for development environment
+
+## 2. Environment Setup
+
+- **Dependencies:**
+  - Run the following command from `./backend/` to install dependencies:
+    ```bash
+    uv sync
+    ```
+- **Virtual Environment:**
+  - Activate with:
+    ```bash
+    source .venv/bin/activate
+    ```
+  - Ensure your editor uses the interpreter at `backend/.venv/bin/python`.
+
+## 3. Code Structure
+
+- **Models:**  
+  - Define data models and SQL tables in `backend/app/models.py`.
+- **API Endpoints:**  
+  - Implement endpoints within `backend/app/api/`.
+- **CRUD Utilities:**  
+  - Use `backend/app/crud.py` for Create, Read, Update, Delete operations.
+- **Tests:**  
+  - Write tests in `backend/app/tests/` and run them with:
+    ```bash
+    bash ./scripts/test.sh
+    ```
+
+## 4. Docker Compose and Development Workflow
+
+- **Local Development:**
+  - Start the development environment as detailed in [../development.md](mdc:../development.md).
+- **Live Code Sync:**
+  - The backend code is synchronized into the Docker container for immediate testing.
+- **Command Overrides:**
+  - Use the override that runs `fastapi run --reload` for live reloading during development.
+- **Restarting on Errors:**
+  - If a syntax error stops the container, restart it with:
+    ```bash
+    docker compose watch
+    ```
+- **Interactive Container Session:**
+  - To get a bash shell inside the container:
+    ```bash
+    docker compose exec backend bash
+    ```
+
+## 5. Debugging and Testing
+
+- **VS Code Debugger:**
+  - Utilize the pre-configured VS Code launch settings for breakpoints and variable inspection.
+- **Running Tests:**
+  - Tests can be executed via the VS Code Python tests tab or by running:
+    ```bash
+    docker compose exec backend bash scripts/tests-start.sh
+    ```
+
+## 6. Migrations
+
+- **Creating a Revision:**
+  - After modifying models, generate a migration revision:
+    ```bash
+    alembic revision --autogenerate -m "Describe your change"
+    ```
+- **Upgrading the Database:**
+  - Apply migrations using:
+    ```bash
+    alembic upgrade head
+    ```
+- **Bypassing Migrations (Not Recommended for Production):**
+  - Uncomment the `SQLModel.metadata.create_all(engine)` line in `./backend/app/core/db.py` and comment out the Alembic upgrade command in `scripts/prestart.sh`.
+
+## 7. Email Templates
+
+- **Source and Build:**
+  - Source files are in `backend/app/email-templates/src`.
+  - Build output should be saved in `backend/app/email-templates/build`.
+- **MJML Usage:**
+  - Use the [MJML extension](mdc:https:/marketplace.visualstudio.com/items?itemName=attilabuti.vscode-mjml) in VS Code to convert `.mjml` files to HTML.
+
+## 8. Best Practices for AI Code Assistance
+
+- **Consistency:**  
+  - Follow the project’s directory structure and naming conventions.
+- **Environment Awareness:**  
+  - Code generation should account for Docker-specific behaviors and the live reload setup.
+- **Migration Discipline:**  
+  - Always ensure that changes to models are accompanied by corresponding Alembic migration steps.
+- **Testing:**  
+  - Verify that generated code integrates seamlessly with our testing framework and debugging tools.
+
+---
+
+These rules are designed to provide context and guidelines for both human developers and AI-assisted tools to ensure that all contributions align with our project's architecture and workflow.

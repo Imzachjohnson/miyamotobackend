@@ -1,0 +1,161 @@
+---
+description: Development rules
+globs: *
+---
+---
+description: "FastAPI Project Development Rules: Guidelines for working with Docker Compose, local development, environment configuration, and code linting."
+globs:
+  - "docker-compose*.yml"
+  - ".env"
+  - ".pre-commit-config.yaml"
+  - "scripts/**/*.sh"
+---
+
+# FastAPI Project - Development Rules
+
+This document provides context and instructions for managing the development environment of our FastAPI project. It covers Docker Compose usage, switching between Docker and local development, environment variable configuration, and code quality checks.
+
+---
+
+## 1. Docker Compose Workflow
+
+- **Starting the Stack:**
+  - Use the following command to start the local stack:
+    ```bash
+    docker compose watch
+    ```
+  - The stack includes:
+    - **Frontend:** [http://localhost:5173](http://localhost:5173)
+    - **Backend (JSON API):** [http://localhost:8000](http://localhost:8000)
+    - **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
+    - **Adminer:** [http://localhost:8080](http://localhost:8080)
+    - **Traefik UI:** [http://localhost:8090](http://localhost:8090)
+
+- **Monitoring Logs:**
+  - To view logs for all services:
+    ```bash
+    docker compose logs
+    ```
+  - To view logs for a specific service (e.g., backend):
+    ```bash
+    docker compose logs backend
+    ```
+
+---
+
+## 2. Local Development
+
+- **Port Consistency:**
+  - Both Docker Compose services and local development servers use the same ports:
+    - **Backend:** http://localhost:8000
+    - **Frontend:** http://localhost:5173
+- **Switching to Local Servers:**
+  - **For Frontend:**
+    1. Stop the Docker Compose frontend service:
+       ```bash
+       docker compose stop frontend
+       ```
+    2. Start the local development server:
+       ```bash
+       cd frontend
+       npm run dev
+       ```
+  - **For Backend:**
+    1. Stop the Docker Compose backend service:
+       ```bash
+       docker compose stop backend
+       ```
+    2. Run the local development server:
+       ```bash
+       cd backend
+       fastapi dev app/main.py
+       ```
+
+---
+
+## 3. Docker Compose with `localhost.tiangolo.com`
+
+- **Custom Domain Setup:**
+  - For testing subdomain routing locally, edit your `.env` file:
+    ```dotenv
+    DOMAIN=localhost.tiangolo.com
+    ```
+  - Restart the stack:
+    ```bash
+    docker compose watch
+    ```
+  - This will route:
+    - **Backend:** [http://api.localhost.tiangolo.com](http://api.localhost.tiangolo.com)
+    - **Frontend:** [http://dashboard.localhost.tiangolo.com](http://dashboard.localhost.tiangolo.com)
+    - **Docs:** [http://api.localhost.tiangolo.com/docs](http://api.localhost.tiangolo.com/docs) and [http://api.localhost.tiangolo.com/redoc](http://api.localhost.tiangolo.com/redoc)
+    - **Adminer & Traefik UI:** Accessible via modified ports (e.g., `localhost.tiangolo.com:8080`)
+
+---
+
+## 4. Docker Compose Files & Environment Variables
+
+- **Configuration Files:**
+  - **`docker-compose.yml`:** Main configuration for the entire stack.
+  - **`docker-compose.override.yml`:** Overrides for development (e.g., mounting source code as volumes).
+- **Environment Variables:**
+  - All services rely on variables from the `.env` file.
+  - If you update environment variables, restart the stack:
+    ```bash
+    docker compose watch
+    ```
+
+---
+
+## 5. The .env File
+
+- **Purpose:**
+  - Contains configurations, generated keys, and passwords.
+- **Best Practice:**
+  - For public projects, consider excluding `.env` from Git and using CI/CD secrets instead.
+  - Adjust your `docker-compose.yml` to read environment variables from your CI/CD system if needed.
+
+---
+
+## 6. Pre-commit and Code Linting
+
+- **Tool:** [pre-commit](https://pre-commit.com/)
+- **Installation:**
+  - Pre-commit is part of the project dependencies.
+  - Install pre-commit hooks locally using:
+    ```bash
+    uv run pre-commit install
+    ```
+  - This ensures code is linted and formatted before every commit.
+- **Manual Run:**
+  - To run pre-commit on all files manually:
+    ```bash
+    uv run pre-commit run --all-files
+    ```
+
+---
+
+## 7. URLs for Development
+
+### Standard Development URLs
+
+- **Frontend:** [http://localhost:5173](http://localhost:5173)
+- **Backend:** [http://localhost:8000](http://localhost:8000)
+- **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Adminer:** [http://localhost:8080](http://localhost:8080)
+- **Traefik UI:** [http://localhost:8090](http://localhost:8090)
+- **MailCatcher:** [http://localhost:1080](http://localhost:1080)
+
+### Development URLs with `localhost.tiangolo.com`
+
+- **Frontend:** [http://dashboard.localhost.tiangolo.com](http://dashboard.localhost.tiangolo.com)
+- **Backend:** [http://api.localhost.tiangolo.com](http://api.localhost.tiangolo.com)
+- **Docs (Swagger):** [http://api.localhost.tiangolo.com/docs](http://api.localhost.tiangolo.com/docs)
+- **Docs (ReDoc):** [http://api.localhost.tiangolo.com/redoc](http://api.localhost.tiangolo.com/redoc)
+- **Adminer:** [http://localhost.tiangolo.com:8080](http://localhost.tiangolo.com:8080)
+- **Traefik UI:** [http://localhost.tiangolo.com:8090](http://localhost.tiangolo.com:8090)
+- **MailCatcher:** [http://localhost.tiangolo.com:1080](http://localhost.tiangolo.com:1080)
+
+---
+
+These guidelines are intended to provide both human developers and AI tools (like Cursor) with the necessary context and instructions for efficient and consistent development practices in our project.
